@@ -1,5 +1,5 @@
 install:
-		npx ci
+		npm ci
 
 lint:
 		npx eslint .
