@@ -4,23 +4,13 @@ import _ from 'lodash';
 const watch = (elements, i18n, state) => {
     const { form, urlInput, submitButton, feedBack } = elements;
 
-    const hendleErrors = () => {
+    const hendleErrors = (errors) => {
         if(state.form.valid === false) {
             // submitButton.disabled = false;
             urlInput.classList.add('is-invalid');
             feedBack.classList.add('text-danger');
+            feedBack.textContent = i18n.t(errors.key, errors.values);
             urlInput.focus();
-            switch (true) {
-                case _.some(state.errors, { key:'errors.invalidUrl' }):
-                    console.log('invalid url')
-                    feedBack.textContent = i18n.t('errors.invalidUrl');
-                    break;
-                case _.some(state.errors, { key:'errors.sameRss' }):
-                    console.log('same rss')
-                    feedBack.textContent = i18n.t('errors.sameRss');
-                    break;
-                default: break;
-            }
         } else {
             submitButton.disabled = false;
             urlInput.classList.remove('is-invalid');
@@ -30,10 +20,11 @@ const watch = (elements, i18n, state) => {
     };
 
     const watchedState = onChange(state, (path) => {
-        console.log(path)
+        // console.log(path)
         switch (path) {
             case 'errors':
-                hendleErrors();
+                console.log(state.errors)
+                hendleErrors(state.errors);
         }
         // console.log(watchedState.form);
         // console.log(watchedState.errors)

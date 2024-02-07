@@ -20,7 +20,7 @@ const app = () => {
             valid: true,
             allAddedUrls: [],
         },
-        errors: [],
+        errors: null,
     };
 
     yup.setLocale({
@@ -38,37 +38,40 @@ const app = () => {
         debug: false,
         lng: defaultlang,
         resources,
-      });
-    // console.log(i18n) 
+      })
+    // console.log(i18n)
+    .then(() => {
+        const watchedState = watch(elements, i18n, initialState);
+        // console.log(watchedState);
+    
+        const validateSchema = (curentUrl, allAddedUrls) => {
+            const schema = yup.string().trim().required().url()
+                .notOneOf(allAddedUrls);
+            return schema.validate(curentUrl);
+        } 
+    
+         elements.form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            watchedState.form.status = 'sending';
+            const formData = new FormData(event.target);
+            // console.log(formData)
+            // console.log([...formData])
+            const curentUrl = formData.get('url');
+            validateSchema(curentUrl, initialState.form.allAddedUrls)
+                .then(() => {
+                    watchedState.form.valid = true;
+                    watchedState.form.allAddedUrls.push(curentUrl);
+                    watchedState.errors = [];
+                })
+                .catch((err) => {
+                    watchedState.form.valid = false;
+                    watchedState.errors = err.errors[0];
+                    // watchedState.errors.push(err.errors);
+                })
+         });  
+    }) 
 
-    const watchedState = watch(elements, i18n, initialState);
-    // console.log(watchedState);
-
-    const validateSchema = (curentUrl, allAddedUrls) => {
-        const schema = yup.string().trim().required().url()
-            .notOneOf(allAddedUrls);
-        return schema.validate(curentUrl);
-    } 
-
-     elements.form.addEventListener('submit', (event) => {
-        event.preventDefault();
-        watchedState.form.status = 'sending';
-        const formData = new FormData(event.target);
-        // console.log(formData)
-        // console.log([...formData])
-        const curentUrl = formData.get('url');
-        validateSchema(curentUrl, initialState.form.allAddedUrls)
-            .then(() => {
-                watchedState.form.valid = true;
-                watchedState.form.allAddedUrls.push(curentUrl);
-                watchedState.errors = [];
-            })
-            .catch((err) => {
-                watchedState.form.valid = false;
-                watchedState.errors = [err.errors[0]];
-                // watchedState.errors.push(err.errors);
-            })
-     });
+    
 };
 
 export default app;
