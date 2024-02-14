@@ -31,7 +31,7 @@ const watch = (elements, i18n, state) => {
         list.append(...itemsFeeds); 
     };
 
-    const createPostsOrFeedsCard = (title) => {
+    const createPostsOrFeedsCard = (cardTitle) => {
         const divCard = document.createElement('div');
         const divCardBody = document.createElement('div');
         const h2CardTitle = document.createElement('h2');
@@ -41,7 +41,7 @@ const watch = (elements, i18n, state) => {
         divCardBody.classList.add('card-body');
         h2CardTitle.classList.add('card-title', 'h4');
         ulListGroup.classList.add('list-group', 'border-0', 'rounded-0');
-        h2CardTitle.textContent = title;
+        h2CardTitle.textContent = cardTitle;
 
         divCard.append(divCardBody, ulListGroup);
         divCardBody.append(h2CardTitle);
