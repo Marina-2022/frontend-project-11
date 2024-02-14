@@ -94,7 +94,10 @@ const app = () => {
                 // const everyPosts = posts.map((post) => {
                 //     console.log('everyPosts app', post)
                 // })
-            }) 
+            }) .catch((err) => {
+                watchedState.loadingProcess.status = 'error';
+                watchedState.loadingProcess.errors = err.message;
+            })
         }
     
         elements.form.addEventListener('submit', (event) => {

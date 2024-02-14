@@ -6,14 +6,15 @@ const watch = (elements, i18n, state) => {
 
     const renderFeedsCard = (state) => {
         const { feeds } = state;
-        console.log('feeds', feeds)
+        // console.log('feeds', feeds)
         if (!divFeeds.hasChildNodes()) {
             const cardfeeds = createPostsOrFeedsCard(i18n.t('feeds'));
             divFeeds.append(cardfeeds);
         };
         const list = divFeeds.querySelector('ul');
-        console.log('list', list)
+        // console.log('list', list)
         const itemsFeeds = feeds.map((feed) => {
+            // console.log('itemsFeeds', feed)
             const li = document.createElement('li');
             const title = document.createElement('h3');
             const description = document.createElement('p');
@@ -31,7 +32,7 @@ const watch = (elements, i18n, state) => {
         list.append(...itemsFeeds); 
     };
 
-    const createPostsOrFeedsCard = (cardTitle) => {
+    const createPostsOrFeedsCard = (textCardTitle) => {
         const divCard = document.createElement('div');
         const divCardBody = document.createElement('div');
         const h2CardTitle = document.createElement('h2');
@@ -41,7 +42,7 @@ const watch = (elements, i18n, state) => {
         divCardBody.classList.add('card-body');
         h2CardTitle.classList.add('card-title', 'h4');
         ulListGroup.classList.add('list-group', 'border-0', 'rounded-0');
-        h2CardTitle.textContent = cardTitle;
+        h2CardTitle.textContent = textCardTitle;
 
         divCard.append(divCardBody, ulListGroup);
         divCardBody.append(h2CardTitle);
@@ -105,7 +106,7 @@ const watch = (elements, i18n, state) => {
             case 'feeds':
                 renderFeedsCard(state)
         }
-        console.log(watchedState);
+        // console.log(watchedState);
         // console.log(watchedState.errors)
     })
     return watchedState;
