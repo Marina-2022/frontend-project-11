@@ -6,6 +6,8 @@ import resources from './locales/index.js';
 import watch from './view.js';
 import parser from './parser.js';
 
+
+
 const getProxyRequestUrl= (url) => {
     const proxyUrl = 'https://allorigins.hexlet.app/get';
     const proxyParams = `?disableCache=true&url=${encodeURIComponent(url)}`;
