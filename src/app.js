@@ -90,15 +90,16 @@ const app = () => {
             return schema
             .validate(curentUrl)
             .then(() => {
-                watchedState.form.isValid = true;
-                watchedState.form.errors = null;
+                // watchedState.form.isValid = true;
+                // watchedState.form.errors = null;
             })
             .catch((err) => {
-                // console.log(err.message)
-                watchedState.form.status = 'fail';
-                watchedState.form.isValid = false;
-                watchedState.form.errors = err.message;
-                console.log('validateSchema', watchedState.form)
+                // // console.log(err.message)
+                // watchedState.form.status = 'fail';
+                // watchedState.form.isValid = false;
+                // watchedState.form.errors = err.message;
+                // console.log('validateSchema', watchedState.form)
+                return err;
             })
         };
     
@@ -110,9 +111,18 @@ const app = () => {
             const urls = watchedState.feeds.map((feed) => feed.url);
             // console.log('urls', urls)
             validateSchema(curentUrl, urls)
-                .then(() => {
-                    console.log('After validation:', watchedState.form);
-                    loadingUrl(curentUrl, watchedState);
+                .then((error) => {
+                    if (!error) {
+                        loadingUrl(curentUrl, watchedState);
+                        watchedState.form.isValid = true;
+                        watchedState.form.errors = null;
+                    } else {
+                        watchedState.form.status = 'fail';
+                        watchedState.form.isValid = false;
+                        watchedState.form.errors = error.message;
+                    }
+                    // console.log('After validation:', watchedState.form);
+                    // loadingUrl(curentUrl, watchedState);
                 })
          });
     });
