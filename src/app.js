@@ -6,8 +6,6 @@ import resources from './locales/index.js';
 import watch from './view.js';
 import parser from './parser.js';
 
-
-
 const getProxyRequestUrl= (url) => {
     const proxyUrl = 'https://allorigins.hexlet.app/get';
     const proxyParams = `?disableCache=true&url=${encodeURIComponent(url)}`;
@@ -28,10 +26,8 @@ const app = () => {
 
     const initialState = {
         form: {
-            // fieldUrl: '',
             status: 'filling',
             isValid: '',
-            // feeds: [],
             errors: null,
         },
         loadingProcess: {
@@ -50,7 +46,7 @@ const app = () => {
         },
         mixed: {
             notOneOf: () => ({ key: 'errors.sameRss' }),
-        }
+        },
     });
 
     const loadingUrl = (url, watchedState) => {
@@ -73,11 +69,11 @@ const app = () => {
             //     console.log('everyPosts app', post)
             // })
         }) .catch((err) => {
-            watchedState.loadingProcess.status = 'error';
+            watchedState.loadingProcess.status = 'fail';
             // watchedState.form.isValid = false;
             watchedState.loadingProcess.errors = err.message;
         })
-    }
+    };
 
     const defaultlang = 'ru';
     const i18n = i18next.createInstance();
@@ -90,42 +86,36 @@ const app = () => {
         const watchedState = watch(elements, i18n, initialState);
     
         const validateSchema = (curentUrl, feeds) => {
-            const schema = yup.string().required().url()
-                .notOneOf(feeds);
+            const schema = yup.string().required().url().notOneOf(feeds);
             return schema
             .validate(curentUrl)
             .then(() => {
-                // watchedState.form.isValid = true;
-                // // watchedState.feeds.push(curentUrl);
-                // watchedState.form.errors = null;
+                watchedState.form.isValid = true;
+                watchedState.form.errors = null;
             })
             .catch((err) => {
-                // watchedState.form.status = 'fail';
-                // watchedState.form.errors = err.message;
-                // console.log('1', watchedState.form)
-                return err;
+                // console.log(err.message)
+                watchedState.form.status = 'fail';
+                watchedState.form.isValid = false;
+                watchedState.form.errors = err.message;
+                console.log('validateSchema', watchedState.form)
             })
-        };  
+        };
     
         elements.form.addEventListener('submit', (event) => {
             event.preventDefault();
             watchedState.form.status = 'sending';
             const formData = new FormData(event.target);
-            // console.log([...formData])
             const curentUrl = formData.get('url');
             const urls = watchedState.feeds.map((feed) => feed.url);
             // console.log('urls', urls)
             validateSchema(curentUrl, urls)
-                .then((err) => {
-                    if(err) {
-                        watchedState.form.status = 'fail';
-                        watchedState.form.errors = err.message;
-                        return;
-                    }
+                .then(() => {
+                    console.log('After validation:', watchedState.form);
                     loadingUrl(curentUrl, watchedState);
                 })
-         });  
-    }) 
+         });
+    });
 };
 
 export default app;

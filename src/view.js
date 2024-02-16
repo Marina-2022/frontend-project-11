@@ -82,13 +82,13 @@ const watch = (elements, i18n, state) => {
 
     const hendleErrors = (state) => {
         const { form, loadingProcess } = state;
-        console.log(form)
-        console.log(state)
-        feedBack.textContent = i18n.t(form.errors);
-        // submitButton.disabled = false;
+
         urlInput.classList.add('is-invalid');
         feedBack.classList.add('text-danger');
-        // console.log('2', state.form.errors)
+
+        console.log('hendleErrors State', state)
+        console.log('hendleErrors Form', form)
+
         if(form.errors) {
             feedBack.textContent = i18n.t(form.errors.key);
             urlInput.focus();
@@ -96,36 +96,33 @@ const watch = (elements, i18n, state) => {
         if(loadingProcess.errors) {
             feedBack.textContent = i18n.t(loadingProcess.errors.key);
             urlInput.focus();
-        } 
-        // else {
-        //     // submitButton.disabled = false;
-        //     urlInput.classList.remove('is-invalid');
-        //     feedBack.classList.remove('text-danger');
-        //     feedBack.classList.add('text-success');
-        //     // feedBack.textContent = '';
-        //     feedBack.textContent = i18n.t('successLoad')
-        // }
+        } else {
+            urlInput.classList.remove('is-invalid');
+            feedBack.classList.remove('text-danger');
+            feedBack.classList.add('text-success');
+            // feedBack.textContent = '';
+            feedBack.textContent = i18n.t('successLoad');
+        }
     };
 
     const watchedState = onChange(state, (path, value) => {
-        // console.log(state)
-        // console.log('value', value)
+        console.log('wath', state.form.errors)
         switch (path) {
             case 'form.status':
-                // console.log(state.form.status)
-                // console.log(value === 'failed')
+               console.log('switch', state.form.errors) 
                 if (value === 'fail') {
                     // console.log(state)
-                    hendleErrors(state, state.form.errors)
+                    hendleErrors(state);
                 }
+                break;
             case 'posts':
-            // console.log('value.posts', value)
                 renderPostsCard(state);
+                break;
             case 'feeds':
-            // console.log('value.feeds', value)
-                renderFeedsCard(state)
+                renderFeedsCard(state);
+                break;
         }
-        console.log(watchedState);
+        // console.log(watchedState);
     })
     return watchedState;
 };
