@@ -2,6 +2,7 @@ import onChange from 'on-change';
 import _ from 'lodash';
 
 const watch = (elements, i18n, state) => {
+    // console.log(state)
     const { form, urlInput, submitButton, feedBack, divPosts, divFeeds } = elements;
 
     const renderFeedsCard = (state) => {
@@ -79,35 +80,52 @@ const watch = (elements, i18n, state) => {
        list.append(...itemsPosts);
     };
 
-    const hendleErrors = (errors) => {
-        if(state.form.isValid === false) {
-            // submitButton.disabled = false;
-            urlInput.classList.add('is-invalid');
-            feedBack.classList.add('text-danger');
-            feedBack.textContent = i18n.t(errors.key, errors.values);
+    const hendleErrors = (state) => {
+        const { form, loadingProcess } = state;
+        console.log(form)
+        console.log(state)
+        feedBack.textContent = i18n.t(form.errors);
+        // submitButton.disabled = false;
+        urlInput.classList.add('is-invalid');
+        feedBack.classList.add('text-danger');
+        // console.log('2', state.form.errors)
+        if(form.errors) {
+            feedBack.textContent = i18n.t(form.errors.key);
             urlInput.focus();
-        } else {
-            // submitButton.disabled = false;
-            urlInput.classList.remove('is-invalid');
-            feedBack.classList.remove('text-danger');
-            feedBack.classList.add('text-success');
-            // feedBack.textContent = '';
-            feedBack.textContent = i18n.t('successLoad')
-        }
+        } 
+        if(loadingProcess.errors) {
+            feedBack.textContent = i18n.t(loadingProcess.errors.key);
+            urlInput.focus();
+        } 
+        // else {
+        //     // submitButton.disabled = false;
+        //     urlInput.classList.remove('is-invalid');
+        //     feedBack.classList.remove('text-danger');
+        //     feedBack.classList.add('text-success');
+        //     // feedBack.textContent = '';
+        //     feedBack.textContent = i18n.t('successLoad')
+        // }
     };
 
-    const watchedState = onChange(state, (path) => {
-        // console.log(path)
+    const watchedState = onChange(state, (path, value) => {
+        // console.log(state)
+        // console.log('value', value)
         switch (path) {
-            case 'form.errors':
-                hendleErrors(state.form.errors);
+            case 'form.status':
+                // console.log(state.form.status)
+                // console.log(value === 'failed')
+                if (value === 'fail') {
+                    // console.log(state)
+                    hendleErrors(state, state.form.errors)
+                }
             case 'posts':
+            // console.log('value.posts', value)
                 renderPostsCard(state);
             case 'feeds':
+            // console.log('value.feeds', value)
                 renderFeedsCard(state)
         }
-        // console.log(watchedState);
-        // console.log(watchedState.errors)
+        console.log(watchedState);
     })
     return watchedState;
 };
