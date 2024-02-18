@@ -86,7 +86,7 @@ const watch = (elements, i18n, state) => {
         urlInput.classList.add('is-invalid');
         feedBack.classList.add('text-danger');
 
-        console.log('hendleErrors State', state)
+        // console.log('hendleErrors State', state)
         console.log('hendleErrors Form', form)
 
         if(form.errors) {
@@ -97,21 +97,21 @@ const watch = (elements, i18n, state) => {
             feedBack.textContent = i18n.t(loadingProcess.errors.key);
             urlInput.focus();
         } else {
-            urlInput.classList.remove('is-invalid');
-            feedBack.classList.remove('text-danger');
-            feedBack.classList.add('text-success');
-            // feedBack.textContent = '';
-            feedBack.textContent = i18n.t('successLoad');
+            // urlInput.classList.remove('is-invalid');
+            // feedBack.classList.remove('text-danger');
+            // feedBack.classList.add('text-success');
+            // // feedBack.textContent = '';
+            // feedBack.textContent = i18n.t('successLoad');
         }
     };
 
     const watchedState = onChange(state, (path, value) => {
-        console.log('wath', state.form.errors)
+        // console.log('wath', state.form.errors)
         switch (path) {
             case 'form.status':
-               console.log('switch', state.form.errors) 
+            //    console.log('switch', state.form.errors)
+            //    console.log('value',value)
                 if (value === 'fail') {
-                    // console.log(state)
                     hendleErrors(state);
                 }
                 break;

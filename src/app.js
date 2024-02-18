@@ -51,7 +51,7 @@ const app = () => {
 
     const loadingUrl = (url, watchedState) => {
         watchedState.loadingProcess.status = 'loading';
-        watchedState.loadingProcess.errors = null;
+        // watchedState.loadingProcess.errors = null;
         return axios.get(getProxyRequestUrl(url))
             .then((response) => {
             // console.log(response)
@@ -70,7 +70,7 @@ const app = () => {
             // })
         }) .catch((err) => {
             watchedState.loadingProcess.status = 'fail';
-            // watchedState.form.isValid = false;
+            watchedState.form.isValid = false;
             watchedState.loadingProcess.errors = err.message;
         })
     };
@@ -120,6 +120,8 @@ const app = () => {
                         watchedState.form.status = 'fail';
                         watchedState.form.isValid = false;
                         watchedState.form.errors = error.message;
+                        // console.log('error.message', error.message)
+                        // console.log('watchedState.form', watchedState.form)
                     }
                     // console.log('After validation:', watchedState.form);
                     // loadingUrl(curentUrl, watchedState);
