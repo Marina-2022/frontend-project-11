@@ -13,6 +13,7 @@ const watch = (elements, i18n, state) => {
             divFeeds.append(cardfeeds);
         };
         const list = divFeeds.querySelector('ul');
+        list.innerHTML = '';
         // console.log('list', list)
         const itemsFeeds = feeds.map((feed) => {
             // console.log('itemsFeeds', feed)
@@ -59,6 +60,7 @@ const watch = (elements, i18n, state) => {
             divPosts.append(cardPosts);
         }
        const list = divPosts.querySelector('ul');
+       list.innerHTML = '';
        const itemsPosts = posts.map((post) => {
         //    console.log('post!', post)
            const li = document.createElement('li');
@@ -83,7 +85,7 @@ const watch = (elements, i18n, state) => {
     const hendleErrorsForm = (state, value) => {
         const { form } = state;
 
-        console.log('hendleErrorsForm value', value)
+        // console.log('hendleErrorsForm value', value)
 
         if(value === 'fail') {
             urlInput.classList.add('is-invalid');
@@ -100,7 +102,7 @@ const watch = (elements, i18n, state) => {
 
     const hendleErrorsLoadingProcess = (state, value) => {
         const { loadingProcess } = state;
-        console.log('hendleErrorsLoadingProcess value', value)
+        // console.log('hendleErrorsLoadingProcess value', value)
         if(value === 'fail') {
             urlInput.classList.add('is-invalid');
             feedBack.classList.add('text-danger');

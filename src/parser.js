@@ -2,10 +2,10 @@ export default (rss) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(rss.data.contents, 'application/xml')
     const parsererror = doc.querySelector('parsererror');
-    // console.log('pars', doc)
+    // console.log('parsErr', parsererror)
 
     if (parsererror) {
-        throw new Error ('errors.invalidRss');
+        throw new Error ('Parser error');
     }
     const feed = {
       title: doc.querySelector('channel > title').textContent,

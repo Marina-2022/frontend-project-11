@@ -49,31 +49,63 @@ const app = () => {
         },
     });
 
+    const loadingError = (error) => {
+        // console.log('loadError', error)
+        if (error === 'Network Error')  {
+            return 'errors.networkError';
+        }
+        if (error === 'Parser error')  {
+            return 'errors.invalidRss';
+        }
+        return 'errors.unknown';
+    };
+
+    const checkPosts = (watchedState) => {
+        const { feeds } = watchedState;
+        const promises = feeds.map((feed) => {
+            return axios.get(getProxyRequestUrl(feed.url), { timeout: 10000 })
+            .then((response) => {
+                const { posts } = parser(response);
+               
+                const oldPosts = watchedState.posts.map((post) => post.link);
+                const newPosts = posts.filter((post) => !oldPosts.some((oldPost) => oldPost === post.link ));
+                watchedState.posts.unshift(...newPosts);
+                // console.log('newPosts', newPosts);
+            })
+            .catch(() => {});
+        })
+            Promise.all(promises)
+            .then(() => {
+                // console.log('done')
+                setTimeout(() => checkPosts(watchedState), 5000);
+            })
+        // console.log('checkPosts', feeds) 
+    };
+
     const loadingUrl = (url, watchedState) => {
         watchedState.loadingProcess.status = 'loading';
         // watchedState.loadingProcess.errors = null;
-        return axios.get(getProxyRequestUrl(url))
+        return axios.get(getProxyRequestUrl(url), { timeout: 10000 })
             .then((response) => {
-            // console.log(response)
+            // console.log('respons', response)
             const { feed, posts } = parser(response)
             feed.url = url;
             feed.id = _.uniqueId();
             
             watchedState.feeds.unshift(feed);
-            // watchedState.feeds = watchedState.feeds.concat(feed);
-            watchedState.posts.unshift(...posts);
+
+            const everyPosts = posts.map((post) => ({ ...post, id: feed.id}))
+            // console.log('everyPosts app', everyPosts)
+            
+            watchedState.posts.unshift(...everyPosts);
+
             watchedState.loadingProcess.status = 'succsess';
-            // console.log('watchedState.loadingProcess.status', watchedState.loadingProcess.status)
-            // watchedState.posts = watchedState.posts.concat(...posts);
-            // watchedState.feeds = [...watchedState.feeds, feed];
-            // watchedState.posts = [...watchedState.posts, ...posts];
-            // watchedState.posts.push(posts);
-            // const everyPosts = posts.map((post) => {
-            //     console.log('everyPosts app', post)
-            // })
+            // console.log('watchedState feed', watchedState.feeds)
+            
         }) .catch((err) => {
-            // console.log('err', err.message)
-            watchedState.loadingProcess.errors = err.message;
+            // console.log('err message', err.message);
+            watchedState.loadingProcess.errors = loadingError(err.message);
+            // console.log('watchedState.loadingProcess.errors', watchedState.loadingProcess.errors)
             watchedState.form.isValid = false;
             watchedState.loadingProcess.status = 'fail';            
         })
@@ -127,6 +159,11 @@ const app = () => {
                     // loadingUrl(curentUrl, watchedState);
                 })
          });
+
+            elements.divPosts.addEventListener('click', (event) => {
+            // console.log('event', event.target.dataset)
+         });
+         checkPosts(watchedState);
     });
 };
 
