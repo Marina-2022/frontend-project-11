@@ -5,20 +5,20 @@ export default (rss) => {
     // console.log('pars', doc)
 
     if (parsererror) {
-        throw new Error ('RSS не валиден');
+        throw new Error ('errors.invalidRss');
     }
     const feed = {
       title: doc.querySelector('channel > title').textContent,
       description: doc.querySelector('channel > description').textContent,
     };
-    //  console.log('pars', feed)
+    //  console.log('pars feed', feed)
 
     const posts = Array.from(doc.querySelectorAll('channel > item')).map((item) => ({
         title: item.querySelector('title').textContent,
         link: item.querySelector('link').textContent,
         description: item.querySelector('description').textContent,
     }))
-    //    console.log('pars', posts)
+    //    console.log('pars posts', posts)
     return {
         feed,
         posts,

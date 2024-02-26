@@ -80,40 +80,53 @@ const watch = (elements, i18n, state) => {
        list.append(...itemsPosts);
     };
 
-    const hendleErrors = (state) => {
-        const { form, loadingProcess } = state;
+    const hendleErrorsForm = (state, value) => {
+        const { form } = state;
 
-        urlInput.classList.add('is-invalid');
-        feedBack.classList.add('text-danger');
+        console.log('hendleErrorsForm value', value)
 
-        // console.log('hendleErrors State', state)
-        console.log('hendleErrors Form', form)
-
-        if(form.errors) {
+        if(value === 'fail') {
+            urlInput.classList.add('is-invalid');
+            feedBack.classList.add('text-danger');
             feedBack.textContent = i18n.t(form.errors.key);
             urlInput.focus();
-        } 
-        if(loadingProcess.errors) {
-            feedBack.textContent = i18n.t(loadingProcess.errors.key);
-            urlInput.focus();
-        } else {
-            // urlInput.classList.remove('is-invalid');
-            // feedBack.classList.remove('text-danger');
-            // feedBack.classList.add('text-success');
-            // // feedBack.textContent = '';
-            // feedBack.textContent = i18n.t('successLoad');
-        }
+        };
+        if(value === 'sending') {
+            urlInput.classList.remove('is-invalid');
+            feedBack.classList.remove('text-danger');
+            feedBack.textContent = '';
+        };
     };
+
+    const hendleErrorsLoadingProcess = (state, value) => {
+        const { loadingProcess } = state;
+        console.log('hendleErrorsLoadingProcess value', value)
+        if(value === 'fail') {
+            urlInput.classList.add('is-invalid');
+            feedBack.classList.add('text-danger');
+            feedBack.textContent = i18n.t(loadingProcess.errors);
+            urlInput.focus();
+        }
+        if(value === 'succsess') {
+            urlInput.classList.remove('is-invalid');
+            feedBack.classList.remove('text-danger');
+            feedBack.classList.add('text-success');
+            // feedBack.textContent = '';
+            feedBack.textContent = i18n.t('successLoad');
+        }
+    }
 
     const watchedState = onChange(state, (path, value) => {
         // console.log('wath', state.form.errors)
+        // console.log('path', path)
         switch (path) {
             case 'form.status':
             //    console.log('switch', state.form.errors)
-            //    console.log('value',value)
-                if (value === 'fail') {
-                    hendleErrors(state);
-                }
+            //    console.log('value', value)
+                hendleErrorsForm(state, value);
+                break;
+            case 'loadingProcess.status':
+                hendleErrorsLoadingProcess(state, value);
                 break;
             case 'posts':
                 renderPostsCard(state);
