@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import resources from './locales/index.js';
 import watch from './view.js';
 import parser from './parser.js';
@@ -21,6 +21,7 @@ const app = () => {
         feedBack: document.querySelector('.feedback'),
         divPosts: document.querySelector('.posts'),
         divFeeds: document.querySelector('.feeds'),
+        modal: document.querySelector('.modal'),
     };
     // console.dir(elements.form);
 
@@ -35,6 +36,8 @@ const app = () => {
             errors: null,
         },
         ui: {
+            id: '',
+            showedPosts: new Set(),
         },
         posts: [],
         feeds: [],
@@ -68,16 +71,24 @@ const app = () => {
                 const { posts } = parser(response);
                
                 const oldPosts = watchedState.posts.map((post) => post.link);
-                const newPosts = posts.filter((post) => !oldPosts.some((oldPost) => oldPost === post.link ));
+                // const newPosts = posts.filter((post) => !oldPosts.some((oldPost) => oldPost === post.link ));
+                const newPosts = posts.filter((post) =>  {
+                    const isNewPost = !oldPosts.some((oldPost) => oldPost === post.link );
+                    if (isNewPost) {
+                        post.id = _.uniqueId();
+                        post.idFeed = feed.id;
+                    }
+                    return isNewPost;
+                });
                 watchedState.posts.unshift(...newPosts);
-                // console.log('newPosts', newPosts);
+                console.log('newPosts', newPosts);
             })
             .catch(() => {});
         })
             Promise.all(promises)
             .then(() => {
                 // console.log('done')
-                setTimeout(() => checkPosts(watchedState), 5000);
+                setTimeout(() => checkPosts(watchedState), 10000);
             })
         // console.log('checkPosts', feeds) 
     };
@@ -94,7 +105,7 @@ const app = () => {
             
             watchedState.feeds.unshift(feed);
 
-            const everyPosts = posts.map((post) => ({ ...post, id: feed.id}))
+            const everyPosts = posts.map((post) => ({ ...post, idFeed: feed.id, id: _.uniqueId() }))
             // console.log('everyPosts app', everyPosts)
             
             watchedState.posts.unshift(...everyPosts);
@@ -105,7 +116,6 @@ const app = () => {
         }) .catch((err) => {
             // console.log('err message', err.message);
             watchedState.loadingProcess.errors = loadingError(err.message);
-            // console.log('watchedState.loadingProcess.errors', watchedState.loadingProcess.errors)
             watchedState.form.isValid = false;
             watchedState.loadingProcess.status = 'fail';            
         })
@@ -161,7 +171,13 @@ const app = () => {
          });
 
             elements.divPosts.addEventListener('click', (event) => {
-            // console.log('event', event.target.dataset)
+                // console.log('event', event.target.dataset)
+                const { id } = event.target.dataset;
+            if (id) {
+                watchedState.ui.id = id;
+                console.log('watchedState.ui.id', watchedState.ui.id)
+                watchedState.ui.showedPosts.add(id);
+              }
          });
          checkPosts(watchedState);
     });

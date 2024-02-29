@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 const watch = (elements, i18n, state) => {
     // console.log(state)
-    const { form, urlInput, submitButton, feedBack, divPosts, divFeeds } = elements;
+    const { form, urlInput, submitButton, feedBack, divPosts, divFeeds, modal } = elements;
 
     const renderFeedsCard = (state) => {
         const { feeds } = state;
@@ -53,7 +53,7 @@ const watch = (elements, i18n, state) => {
     }
 
     const renderPostsCard = (state) => {
-        const { posts } = state;
+        const { posts, ui } = state;
         // console.log('posts', posts)
         if (!divPosts.hasChildNodes()) {
             const cardPosts = createPostsOrFeedsCard(i18n.t('posts'));
@@ -62,18 +62,36 @@ const watch = (elements, i18n, state) => {
        const list = divPosts.querySelector('ul');
        list.innerHTML = '';
        const itemsPosts = posts.map((post) => {
-        //    console.log('post!', post)
+        //    console.log('post id', post.id)
            const li = document.createElement('li');
            const link = document.createElement('a');
            const btn = document.createElement('button');
 
            li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
            link.classList.add('fw-bold');
-           btn.textContent = i18n.t('show')
-           btn.classList.add('btn', 'btn-outline-primary', 'btn-sm')
-        
            link.textContent = post.title;
            link.href = post.link;
+           link.setAttribute('target', '_blank');
+           link.setAttribute('rel', 'noopener noreferrer');
+           link.dataset.id = post.id;
+                 
+           btn.setAttribute('type', 'button');
+           btn.dataset.id = post.id;
+           btn.dataset.bsToggle = 'modal';
+           btn.dataset.bsTarget = '#modal';
+           btn.textContent = i18n.t('show')
+           btn.classList.add('btn', 'btn-outline-primary', 'btn-sm')
+
+        //    console.log('post.id', post.id)
+        //    console.log('ui.showedPosts', ui.showedPosts)
+           console.log(ui.showedPosts.has(post.id))
+           if (ui.showedPosts.has(post.id)) {
+            // console.log('я внутри if')
+            link.classList.remove('fw-bold');
+            link.classList.add('fw-normal', 'link-secondary');
+           } else {
+            link.classList.add('fw-bold');
+           }
 
            li.append(link, btn);
            return li;
@@ -81,6 +99,20 @@ const watch = (elements, i18n, state) => {
     //    console.log('itemsPosts', itemsPosts)
        list.append(...itemsPosts);
     };
+
+    const renderModalCard = (state) => {
+        // console.log('modal', modal);
+        const { posts, ui } = state;
+        const titleModal = modal.querySelector('.modal-title');
+        const descriptionModal = modal.querySelector('.modal-body');
+        const footerModal = modal.querySelector('.modal-footer');
+        const linkBtn = footerModal.querySelector('a');
+        const watchedPost = posts.find((post) => post.id === ui.id);
+        // console.log('watchedPost', watchedPost)
+        titleModal.textContent = watchedPost.title;
+        descriptionModal.textContent = watchedPost.description;
+        linkBtn.setAttribute('href', watchedPost.link);
+    }
 
     const hendleErrorsForm = (state, value) => {
         const { form } = state;
@@ -115,12 +147,14 @@ const watch = (elements, i18n, state) => {
             feedBack.classList.add('text-success');
             // feedBack.textContent = '';
             feedBack.textContent = i18n.t('successLoad');
+            urlInput.value = '';
+            urlInput.focus();
         }
     }
 
     const watchedState = onChange(state, (path, value) => {
         // console.log('wath', state.form.errors)
-        // console.log('path', path)
+        console.log('path', path)
         switch (path) {
             case 'form.status':
             //    console.log('switch', state.form.errors)
@@ -136,8 +170,12 @@ const watch = (elements, i18n, state) => {
             case 'feeds':
                 renderFeedsCard(state);
                 break;
+            case 'ui.showedPosts':
+                renderModalCard(state);
+                renderPostsCard(state);
+                break;
         }
-        // console.log(watchedState);
+        console.log(watchedState.ui);
     })
     return watchedState;
 };
