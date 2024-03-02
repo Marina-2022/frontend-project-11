@@ -3,4 +3,4 @@
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/a2736d285e3fc7433072/maintainability)](https://codeclimate.com/github/Marina-2022/frontend-project-11/maintainability)
 
-https://frontend-project-11-849f.vercel.app
+https://frontend-project-11-849f-git-bugfix-marinas-projects-c6f892ff.vercel.app/

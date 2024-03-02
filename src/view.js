@@ -1,115 +1,186 @@
+/* eslint-env browser */
 import onChange from 'on-change';
-import _ from 'lodash';
 
 const watch = (elements, i18n, state) => {
-    const { form, urlInput, submitButton, feedBack, divPosts, divFeeds } = elements;
+  const {
+    urlInput, submitButton, feedBack, divPosts,
+    divFeeds, modal,
+  } = elements;
 
-    const renderFeedsCard = (state) => {
-        const { feeds } = state;
-        // console.log('feeds', feeds)
-        if (!divFeeds.hasChildNodes()) {
-            const cardfeeds = createPostsOrFeedsCard(i18n.t('feeds'));
-            divFeeds.append(cardfeeds);
-        };
-        const list = divFeeds.querySelector('ul');
-        // console.log('list', list)
-        const itemsFeeds = feeds.map((feed) => {
-            // console.log('itemsFeeds', feed)
-            const li = document.createElement('li');
-            const title = document.createElement('h3');
-            const description = document.createElement('p');
+  const createPostsOrFeedsCard = (textCardTitle) => {
+    const divCard = document.createElement('div');
+    const divCardBody = document.createElement('div');
+    const h2CardTitle = document.createElement('h2');
+    const ulListGroup = document.createElement('ul');
 
-            li.classList.add('list-group-item', 'border-0', 'border-end-0');
-            title.classList.add('h6', 'm-0');
-            description.classList.add('m-0', 'small', 'text-black-50');
+    divCard.classList.add('card', 'border-0');
+    divCardBody.classList.add('card-body');
+    h2CardTitle.classList.add('card-title', 'h4');
+    ulListGroup.classList.add('list-group', 'border-0', 'rounded-0');
+    h2CardTitle.textContent = textCardTitle;
 
-            title.textContent = feed.title;
-            description.textContent = feed.description;
+    divCard.append(divCardBody, ulListGroup);
+    divCardBody.append(h2CardTitle);
 
-            li.append(title, description);
-            return li;
-        })
-        list.append(...itemsFeeds); 
-    };
+    return divCard;
+  };
 
-    const createPostsOrFeedsCard = (textCardTitle) => {
-        const divCard = document.createElement('div');
-        const divCardBody = document.createElement('div');
-        const h2CardTitle = document.createElement('h2');
-        const ulListGroup = document.createElement('ul');
-
-        divCard.classList.add('card', 'border-0');
-        divCardBody.classList.add('card-body');
-        h2CardTitle.classList.add('card-title', 'h4');
-        ulListGroup.classList.add('list-group', 'border-0', 'rounded-0');
-        h2CardTitle.textContent = textCardTitle;
-
-        divCard.append(divCardBody, ulListGroup);
-        divCardBody.append(h2CardTitle);
-
-        return divCard;
+  const renderFeedsCard = () => {
+    const { feeds } = state;
+    // console.log('feeds', feeds)
+    if (!divFeeds.hasChildNodes()) {
+      const cardfeeds = createPostsOrFeedsCard(i18n.t('feeds'));
+      divFeeds.append(cardfeeds);
     }
+    const list = divFeeds.querySelector('ul');
+    list.innerHTML = '';
+    const itemsFeeds = feeds.map((feed) => {
+      // console.log('itemsFeeds', feed)
+      const li = document.createElement('li');
+      const title = document.createElement('h3');
+      const description = document.createElement('p');
 
-    const renderPostsCard = (state) => {
-        const { posts } = state;
-        // console.log('posts', posts)
-        if (!divPosts.hasChildNodes()) {
-            const cardPosts = createPostsOrFeedsCard(i18n.t('posts'));
-            divPosts.append(cardPosts);
-        }
-       const list = divPosts.querySelector('ul');
-       const itemsPosts = posts.map((post) => {
-        //    console.log('post!', post)
-           const li = document.createElement('li');
-           const link = document.createElement('a');
-           const btn = document.createElement('button');
+      li.classList.add('list-group-item', 'border-0', 'border-end-0');
+      title.classList.add('h6', 'm-0');
+      description.classList.add('m-0', 'small', 'text-black-50');
 
-           li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-           link.classList.add('fw-bold');
-           btn.textContent = i18n.t('show')
-           btn.classList.add('btn', 'btn-outline-primary', 'btn-sm')
-        
-           link.textContent = post.title;
-           link.href = post.link;
+      title.textContent = feed.title;
+      description.textContent = feed.description;
 
-           li.append(link, btn);
-           return li;
-       })
-    //    console.log('itemsPosts', itemsPosts)
-       list.append(...itemsPosts);
-    };
+      li.append(title, description);
+      return li;
+    });
+    list.append(...itemsFeeds);
+  };
 
-    const hendleErrors = (errors) => {
-        if(state.form.isValid === false) {
-            // submitButton.disabled = false;
-            urlInput.classList.add('is-invalid');
-            feedBack.classList.add('text-danger');
-            feedBack.textContent = i18n.t(errors.key, errors.values);
-            urlInput.focus();
-        } else {
-            // submitButton.disabled = false;
-            urlInput.classList.remove('is-invalid');
-            feedBack.classList.remove('text-danger');
-            feedBack.classList.add('text-success');
-            // feedBack.textContent = '';
-            feedBack.textContent = i18n.t('successLoad')
-        }
-    };
+  const renderPostsCard = () => {
+    const { posts, ui } = state;
+    if (!divPosts.hasChildNodes()) {
+      const cardPosts = createPostsOrFeedsCard(i18n.t('posts'));
+      divPosts.append(cardPosts);
+    }
+    const list = divPosts.querySelector('ul');
+    list.innerHTML = '';
+    const itemsPosts = posts.map((post) => {
+      //    console.log('post id', post.id)
+      const li = document.createElement('li');
+      const link = document.createElement('a');
+      const btn = document.createElement('button');
 
-    const watchedState = onChange(state, (path) => {
-        // console.log(path)
-        switch (path) {
-            case 'form.errors':
-                hendleErrors(state.form.errors);
-            case 'posts':
-                renderPostsCard(state);
-            case 'feeds':
-                renderFeedsCard(state)
-        }
-        // console.log(watchedState);
-        // console.log(watchedState.errors)
-    })
-    return watchedState;
+      li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
+      link.classList.add('fw-bold');
+      link.textContent = post.title;
+      link.href = post.link;
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+      link.dataset.id = post.id;
+
+      btn.setAttribute('type', 'button');
+      btn.dataset.id = post.id;
+      btn.dataset.bsToggle = 'modal';
+      btn.dataset.bsTarget = '#modal';
+      btn.textContent = i18n.t('show');
+      btn.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+
+      //    console.log('ui.showedPosts', ui.showedPosts)
+      //   console.log(ui.showedPosts.has(post.id));
+      if (ui.showedPosts.has(post.id)) {
+        link.classList.remove('fw-bold');
+        link.classList.add('fw-normal', 'link-secondary');
+      } else {
+        link.classList.add('fw-bold');
+      }
+
+      li.append(link, btn);
+      return li;
+    });
+    list.append(...itemsPosts);
+  };
+
+  const renderModalCard = () => {
+    const { posts, ui } = state;
+    const titleModal = modal.querySelector('.modal-title');
+    const descriptionModal = modal.querySelector('.modal-body');
+    const footerModal = modal.querySelector('.modal-footer');
+    const linkBtn = footerModal.querySelector('a');
+    const watchedPost = posts.find((post) => post.id === ui.id);
+    titleModal.textContent = watchedPost.title;
+    descriptionModal.textContent = watchedPost.description;
+    linkBtn.setAttribute('href', watchedPost.link);
+  };
+
+  const hendleErrorsForm = (value) => {
+    const { form } = state;
+
+    if (value === 'fail') {
+      urlInput.classList.add('is-invalid');
+      feedBack.classList.add('text-danger');
+      feedBack.textContent = i18n.t(form.errors.key);
+      submitButton.removeAttribute('disabled');
+      urlInput.removeAttribute('disabled');
+      urlInput.focus();
+    }
+    if (value === 'sending') {
+      submitButton.removeAttribute('disabled');
+      urlInput.removeAttribute('disabled');
+      urlInput.classList.remove('is-invalid');
+      feedBack.classList.remove('text-danger');
+      feedBack.textContent = '';
+    }
+  };
+
+  const hendleErrorsLoadingProcess = (value) => {
+    const { loadingProcess } = state;
+    if (value === 'fail') {
+      urlInput.classList.add('is-invalid');
+      feedBack.classList.add('text-danger');
+      feedBack.textContent = i18n.t(loadingProcess.errors);
+      submitButton.removeAttribute('disabled');
+      urlInput.removeAttribute('disabled');
+      urlInput.focus();
+    }
+    if (value === 'succsess') {
+      urlInput.classList.remove('is-invalid');
+      feedBack.classList.remove('text-danger');
+      feedBack.classList.add('text-success');
+      feedBack.textContent = i18n.t('successLoad');
+      submitButton.removeAttribute('disabled');
+      urlInput.removeAttribute('disabled');
+      urlInput.value = '';
+      urlInput.focus();
+    }
+    if (value === 'loading') {
+      urlInput.setAttribute('disabled', '');
+      submitButton.setAttribute('disabled', '');
+    }
+  };
+
+  const watchedState = onChange(state, (path, value) => {
+    // console.log('path', path)
+    switch (path) {
+      case 'form.status':
+        hendleErrorsForm(value);
+        break;
+      case 'loadingProcess.status':
+        hendleErrorsLoadingProcess(value);
+        break;
+      case 'posts':
+        renderPostsCard();
+        break;
+      case 'feeds':
+        renderFeedsCard();
+        break;
+      case 'ui.showedPosts':
+        renderModalCard();
+        renderPostsCard();
+        break;
+      default:
+        console.error('Unknown path:', path);
+        break;
+    }
+    // console.log(watchedState.ui);
+  });
+  return watchedState;
 };
 
 export default watch;
