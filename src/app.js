@@ -6,11 +6,66 @@ import * as _ from 'lodash';
 import resources from './locales/index.js';
 import watch from './view.js';
 import parser from './parser.js';
+import setlocalErr from './locales/setLocale.js';
 
 const getProxyRequestUrl = (url) => {
   const proxyUrl = 'https://allorigins.hexlet.app/get';
   const proxyParams = `?disableCache=true&url=${encodeURIComponent(url)}`;
   return `${proxyUrl}${proxyParams}`;
+};
+
+const delay = 5000;
+
+const loadingError = (error) => {
+  if (error.name === 'AxiosError') {
+    return 'errors.networkError';
+  }
+  if (error.parserError) {
+    return 'errors.invalidRss';
+  }
+  return 'errors.unknown';
+};
+
+const loadingUrl = (url, watchedState) => {
+  watchedState.loadingProcess.status = 'loading';
+  // watchedState.loadingProcess.errors = null;
+  return axios.get(getProxyRequestUrl(url), { timeout: 10000 })
+    .then((response) => {
+      const { feed, posts } = parser(response);
+      feed.url = url;
+      feed.id = _.uniqueId();
+      watchedState.feeds.unshift(feed);
+      const everyPosts = posts.map((post) => ({
+        ...post,
+        idFeed: feed.id,
+        id: _.uniqueId(),
+      }));
+
+      watchedState.posts.unshift(...everyPosts);
+      watchedState.loadingProcess.status = 'succsess';
+    }).catch((err) => {
+      watchedState.loadingProcess.errors = loadingError(err);
+      watchedState.loadingProcess.status = 'fail';
+    });
+};
+
+const checkPosts = (watchedState) => {
+  const { feeds } = watchedState;
+  const promises = feeds.map((feed) => axios.get(getProxyRequestUrl(feed.url), { timeout: 10000 })
+    .then((response) => {
+      const { posts } = parser(response);
+
+      const oldPosts = watchedState.posts.map((post) => post.link);
+      const newPosts = posts
+        .filter((post) => !oldPosts.includes(post.link))
+        .map((post) => ({ ...post, id: _.uniqueId(), idFeed: feed.id }));
+      watchedState.posts.unshift(...newPosts);
+    })
+    .catch(() => {}));
+  Promise.all(promises)
+    .then(() => {
+      setTimeout(() => checkPosts(watchedState), delay);
+    });
 };
 
 const app = () => {
@@ -41,56 +96,7 @@ const app = () => {
     modal: document.querySelector('.modal'),
   };
 
-  yup.setLocale({
-    string: {
-      url: () => ({ key: 'errors.invalidUrl' }),
-      required: () => ({ key: 'errors.required' }),
-    },
-    mixed: {
-      notOneOf: () => ({ key: 'errors.sameRss' }),
-    },
-  });
-
-  const loadingError = (error) => {
-    // console.log('loadError', error)
-    if (error.name === 'AxiosError') {
-      return 'errors.networkError';
-    }
-    if (error.parserError) {
-      return 'errors.invalidRss';
-    }
-    return 'errors.unknown';
-  };
-
-  const checkPosts = (watchedState) => {
-    const { feeds } = watchedState;
-    const promises = feeds.map((feed) => axios.get(getProxyRequestUrl(feed.url), { timeout: 10000 })
-      .then((response) => {
-        const { posts } = parser(response);
-
-        const oldPosts = watchedState.posts.map((post) => post.link);
-        const newPosts = posts
-          .filter((post) => !oldPosts.includes(post.link))
-          .map((post) => ({ ...post, id: _.uniqueId(), idFeed: feed.id }));
-        watchedState.posts.unshift(...newPosts);
-      })
-      //   {
-      //     const isNewPost = !oldPosts.some((oldPost) => oldPost === post.link);
-      //     if (isNewPost) {
-      //       post.id = _.uniqueId();
-      //       post.idFeed = feed.id;
-      //     }
-      //     return isNewPost;
-      //   });
-      //   watchedState.posts.unshift(...newPosts);
-      // })
-      .catch(() => {}));
-    Promise.all(promises)
-      .then(() => {
-        setTimeout(() => checkPosts(watchedState), 5000);
-      });
-    // console.log('checkPosts', feeds)
-  };
+  yup.setLocale(setlocalErr);
 
   const defaultlang = 'ru';
   const i18n = i18next.createInstance();
@@ -110,32 +116,28 @@ const app = () => {
           .catch((err) => err);
       };
 
-      const loadingUrl = (url) => {
-        watchedState.loadingProcess.status = 'loading';
-        // watchedState.loadingProcess.errors = null;
-        return axios.get(getProxyRequestUrl(url), { timeout: 10000 })
-          .then((response) => {
-            // console.log('respons', response)
-            const { feed, posts } = parser(response);
-            feed.url = url;
-            feed.id = _.uniqueId();
+      // const loadingUrl = (url) => {
+      //   watchedState.loadingProcess.status = 'loading';
+      //   // watchedState.loadingProcess.errors = null;
+      //   return axios.get(getProxyRequestUrl(url), { timeout: 10000 })
+      //     .then((response) => {
+      //       const { feed, posts } = parser(response);
+      //       feed.url = url;
+      //       feed.id = _.uniqueId();
+      //       watchedState.feeds.unshift(feed);
+      //       const everyPosts = posts.map((post) => ({
+      //         ...post,
+      //         idFeed: feed.id,
+      //         id: _.uniqueId(),
+      //       }));
 
-            watchedState.feeds.unshift(feed);
-
-            const everyPosts = posts.map((post) => ({
-              ...post,
-              idFeed: feed.id,
-              id: _.uniqueId(),
-            }));
-
-            watchedState.posts.unshift(...everyPosts);
-            watchedState.loadingProcess.status = 'succsess';
-          }).catch((err) => {
-            // console.log('err message', err);
-            watchedState.loadingProcess.errors = loadingError(err);
-            watchedState.loadingProcess.status = 'fail';
-          });
-      };
+      //       watchedState.posts.unshift(...everyPosts);
+      //       watchedState.loadingProcess.status = 'succsess';
+      //     }).catch((err) => {
+      //       watchedState.loadingProcess.errors = loadingError(err);
+      //       watchedState.loadingProcess.status = 'fail';
+      //     });
+      // };
 
       elements.form.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -143,7 +145,6 @@ const app = () => {
         const formData = new FormData(event.target);
         const curentUrl = formData.get('url');
         const urls = watchedState.feeds.map((feed) => feed.url);
-        // console.log('urls', urls)
         validateSchema(curentUrl, urls)
           .then((error) => {
             if (!error) {
@@ -160,15 +161,13 @@ const app = () => {
       });
 
       elements.divPosts.addEventListener('click', (event) => {
-        // console.log('event', event.target.dataset)
         const { id } = event.target.dataset;
         if (id) {
           watchedState.ui.id = id;
-          // console.log('watchedState.ui.id', watchedState.ui.id);
           watchedState.ui.showedPosts.add(id);
         }
       });
-      checkPosts(watchedState);
+      checkPosts(watchedState, delay);
     });
 };
 
