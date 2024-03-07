@@ -27,7 +27,6 @@ const watch = (elements, i18n, state) => {
 
   const renderFeedsCard = () => {
     const { feeds } = state;
-    // console.log('feeds', feeds)
     if (!divFeeds.hasChildNodes()) {
       const cardfeeds = createPostsOrFeedsCard(i18n.t('feeds'));
       divFeeds.append(cardfeeds);
@@ -35,7 +34,6 @@ const watch = (elements, i18n, state) => {
     const list = divFeeds.querySelector('ul');
     list.innerHTML = '';
     const itemsFeeds = feeds.map((feed) => {
-      // console.log('itemsFeeds', feed)
       const li = document.createElement('li');
       const title = document.createElement('h3');
       const description = document.createElement('p');
@@ -62,7 +60,6 @@ const watch = (elements, i18n, state) => {
     const list = divPosts.querySelector('ul');
     list.innerHTML = '';
     const itemsPosts = posts.map((post) => {
-      //    console.log('post id', post.id)
       const li = document.createElement('li');
       const link = document.createElement('a');
       const btn = document.createElement('button');
@@ -82,8 +79,6 @@ const watch = (elements, i18n, state) => {
       btn.textContent = i18n.t('show');
       btn.classList.add('btn', 'btn-outline-primary', 'btn-sm');
 
-      //    console.log('ui.showedPosts', ui.showedPosts)
-      //   console.log(ui.showedPosts.has(post.id));
       if (ui.showedPosts.has(post.id)) {
         link.classList.remove('fw-bold');
         link.classList.add('fw-normal', 'link-secondary');
@@ -156,7 +151,6 @@ const watch = (elements, i18n, state) => {
   };
 
   const watchedState = onChange(state, (path, value) => {
-    // console.log('path', path)
     switch (path) {
       case 'form.status':
         hendleErrorsForm(value);
@@ -178,7 +172,6 @@ const watch = (elements, i18n, state) => {
         console.error('Unknown path:', path);
         break;
     }
-    // console.log(watchedState.ui);
   });
   return watchedState;
 };

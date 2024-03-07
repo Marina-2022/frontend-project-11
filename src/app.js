@@ -116,29 +116,6 @@ const app = () => {
           .catch((err) => err);
       };
 
-      // const loadingUrl = (url) => {
-      //   watchedState.loadingProcess.status = 'loading';
-      //   // watchedState.loadingProcess.errors = null;
-      //   return axios.get(getProxyRequestUrl(url), { timeout: 10000 })
-      //     .then((response) => {
-      //       const { feed, posts } = parser(response);
-      //       feed.url = url;
-      //       feed.id = _.uniqueId();
-      //       watchedState.feeds.unshift(feed);
-      //       const everyPosts = posts.map((post) => ({
-      //         ...post,
-      //         idFeed: feed.id,
-      //         id: _.uniqueId(),
-      //       }));
-
-      //       watchedState.posts.unshift(...everyPosts);
-      //       watchedState.loadingProcess.status = 'succsess';
-      //     }).catch((err) => {
-      //       watchedState.loadingProcess.errors = loadingError(err);
-      //       watchedState.loadingProcess.status = 'fail';
-      //     });
-      // };
-
       elements.form.addEventListener('submit', (event) => {
         event.preventDefault();
         watchedState.form.status = 'sending';
