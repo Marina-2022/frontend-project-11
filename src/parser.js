@@ -8,7 +8,10 @@ export default (rss) => {
   if (parsererror) {
     const error = new Error(parsererror.textContent);
     error.parserError = true;
-    // console.log('error', error);
+    error.data = rss;
+    console.dir(error);
+    // console.log('parsererror', parsererror);
+    // console.log('rss', rss);
     throw error;
   }
   const feed = {
